@@ -1,5 +1,8 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.json())
 
 let persons = [
   {
@@ -24,12 +27,28 @@ let persons = [
   }
 ]
 
+const generateId = () => {
+  const existingIds = [...persons.map( x => x.id )]
+  let newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+  while (existingIds.indexOf(newId) >= 0) {
+    newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+  }
+  return newId
+}
+
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (req, res) => {
   res.json(persons)
+})
+
+app.post('/api/persons', (req, res) => {
+  const newPerson = req.body
+  newPerson.id = generateId()
+  persons.push(newPerson)
+  res.json(newPerson)
 })
 
 app.get('/api/persons/:id', (req, res) => {
