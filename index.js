@@ -46,6 +46,20 @@ app.get('/api/persons', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const newPerson = req.body
+  const requestIsOk = newPerson.name && newPerson.number && [...persons.map( x => x.name )].indexOf(newPerson.name) < 0
+  if (!newPerson.name) {
+    return res.status(400).json({ 
+      error: 'Name missing from request' 
+    })
+  } else if (!newPerson.number) {
+    return res.status(400).json({ 
+      error: 'Number missing from request' 
+    })
+  } else if ([...persons.map( x => x.name )].indexOf(newPerson.name) >= 0) {
+    return res.status(400).json({ 
+      error: 'Name must be unique' 
+    })
+  }
   newPerson.id = generateId()
   persons.push(newPerson)
   res.json(newPerson)
