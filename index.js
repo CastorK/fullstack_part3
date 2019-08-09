@@ -32,6 +32,20 @@ app.get('/api/persons', (req, res) => {
   res.json(persons)
 })
 
+app.get('/api/persons/:id', (req, res) => {
+  const person = persons.find(p => p.id === Number(req.params.id))
+  if (person) {
+    res.json(person)
+  } else {
+    res.status(404).end()
+  }
+})
+
+app.delete('/api/persons/:id', (req, res) => {
+  persons = persons.filter(p => p.id !== Number(req.params.id))
+  res.status(204).end()
+})
+
 app.get('/info', (req, res) => {
   const amountStr = `Phonebook has info for ${persons.length} people`
   const dateStr = new Date()
