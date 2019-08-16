@@ -1,8 +1,24 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const morgan = require('morgan')
 
 app.use(bodyParser.json())
+app.use(morgan(function (tokens, req, res) {
+  var result =  [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ]
+
+  if (tokens.method(req,res) === 'POST') {
+    result.push(JSON.stringify(req.body))
+  }
+
+  return result.join(' ')
+}))
 
 let persons = [
   {
@@ -45,7 +61,7 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-  const newPerson = req.body
+  const newPerson = Object.assign({}, req.body)
   const requestIsOk = newPerson.name && newPerson.number && [...persons.map( x => x.name )].indexOf(newPerson.name) < 0
   if (!newPerson.name) {
     return res.status(400).json({ 
