@@ -5,8 +5,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 require('dotenv').config()
 
-const url = process.env.DB_URL;
-mongoose.connect(url, { useNewUrlParser: true })
+const Person = require('./models/person');
 
 app.use(bodyParser.json())
 app.use(morgan(function (tokens, req, res) {
@@ -27,49 +26,17 @@ app.use(morgan(function (tokens, req, res) {
 app.use(cors())
 app.use(express.static('build'))
 
-let persons = [
-  {
-    "name": "Ada Lovelace",
-    "number": "39-44-53235323",
-    "id": 1
-  },
-  {
-    "name": "Martti Tienari",
-    "number": "123",
-    "id": 2
-  },
-  {
-    "name": "Arto Järvinen",
-    "number": "040-123456",
-    "id": 3
-  },
-  {
-    "name": "Lea Kutvonen",
-    "number": "040-123456",
-    "id": 4
-  }
-]
-
-const generateId = () => {
-  const existingIds = [...persons.map( x => x.id )]
-  let newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-  while (existingIds.indexOf(newId) >= 0) {
-    newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-  }
-  return newId
-}
-
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then( response => {res.json(response)})
 })
 
 app.post('/api/persons', (req, res) => {
   const newPerson = Object.assign({}, req.body)
-  const requestIsOk = newPerson.name && newPerson.number && [...persons.map( x => x.name )].indexOf(newPerson.name) < 0
+
   if (!newPerson.name) {
     return res.status(400).json({ 
       error: 'Name missing from request' 
@@ -78,14 +45,11 @@ app.post('/api/persons', (req, res) => {
     return res.status(400).json({ 
       error: 'Number missing from request' 
     })
-  } else if ([...persons.map( x => x.name )].indexOf(newPerson.name) >= 0) {
-    return res.status(400).json({ 
-      error: 'Name must be unique' 
-    })
   }
-  newPerson.id = generateId()
-  persons.push(newPerson)
-  res.json(newPerson)
+
+  new Person(req.body).save().then( response => {
+    res.json(response)
+  })
 })
 
 app.get('/api/persons/:id', (req, res) => {
