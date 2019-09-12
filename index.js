@@ -5,7 +5,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 require('dotenv').config()
 
-const Person = require('./models/person');
+const Person = require('./models/person')
 
 app.use(bodyParser.json())
 app.use(morgan(function (tokens, req, res) {
@@ -36,9 +36,9 @@ app.get('/api/persons', (req, res, next) => {
 
 app.post('/api/persons', (req, res, next) => {
   if (!req.body.name) {
-    return res.status(400).json({error: 'Name missing from request'})
+    return res.status(400).json({ error: 'Name missing from request' })
   } else if (!req.body.number) {
-    return res.status(400).json({error: 'Number missing from request'})
+    return res.status(400).json({ error: 'Number missing from request' })
   }
 
   new Person(req.body)
@@ -52,7 +52,7 @@ app.get('/api/persons/:id', (req, res, next) => {
     .findById(req.params.id)
     .then( response => {
       if (!response) {
-        res.status(404).send({error:`Person with id ${req.params.id} not found`})
+        res.status(404).send({ error:`Person with id ${req.params.id} not found` })
       } else {
         res.json(response)
       }
@@ -69,7 +69,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-  Person.findByIdAndRemove(req.params.id).then( response => { res.status(204).end() }).catch( error => next(error) )
+  Person.findByIdAndRemove(req.params.id).then( res.status(204).end() ).catch( error => next(error) )
 })
 
 app.get('/info', (req, res, next) => {
